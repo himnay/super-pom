@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" font-family="'Segoe UI', Arial, sans-serif">
+
+  <!-- Background -->
+  <rect width="900" height="700" fill="#f8f9fa" rx="8"/>
+
+  <!-- Title -->
+  <text x="450" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a2e">Maven BOM + Parent POM Architecture</text>
+  <text x="450" y="56" text-anchor="middle" font-size="12" fill="#666">Centralised version management across all LLM platform services</text>
+
+  <!-- ======== spring-boot-starter-parent ======== -->
+  <rect x="300" y="80" width="300" height="50" rx="8" fill="#6c757d" stroke="#495057" stroke-width="1.5"/>
+  <text x="450" y="100" text-anchor="middle" font-size="12" font-weight="bold" fill="#fff">spring-boot-starter-parent</text>
+  <text x="450" y="118" text-anchor="middle" font-size="11" fill="#ddd">4.1.0  (upstream)</text>
+
+  <!-- ======== llm-bom box ======== -->
+  <rect x="30" y="175" width="340" height="200" rx="8" fill="#fff3cd" stroke="#ffc107" stroke-width="2"/>
+  <text x="200" y="198" text-anchor="middle" font-size="13" font-weight="bold" fill="#856404">llm-bom  (maven-bom repo)</text>
+  <text x="200" y="215" text-anchor="middle" font-size="10" fill="#856404">com.org.llm : llm-bom : 1.0.0</text>
+  <!-- BOM contents -->
+  <text x="48" y="240" font-size="10" fill="#555">imports:</text>
+  <text x="55" y="256" font-size="10" fill="#333">▸ spring-boot-dependencies  4.1.0</text>
+  <text x="55" y="271" font-size="10" fill="#333">▸ spring-cloud-dependencies  2025.1.2</text>
+  <text x="55" y="286" font-size="10" fill="#333">▸ spring-ai-bom  2.0.0-RC2</text>
+  <text x="55" y="301" font-size="10" fill="#333">▸ testcontainers-bom  1.21.3</text>
+  <text x="48" y="318" font-size="10" fill="#555">pins:</text>
+  <text x="55" y="333" font-size="10" fill="#333">resilience4j · micrometer-jvm-extras · logstash-logback</text>
+  <text x="55" y="348" font-size="10" fill="#333">pdfbox · poi-ooxml · tess4j · anthropic-java · swagger-parser</text>
+  <text x="55" y="363" font-size="10" fill="#333">…all non-BOM third-party dependencies</text>
+
+  <!-- ======== llm-parent box ======== -->
+  <rect x="530" y="175" width="340" height="185" rx="8" fill="#d1ecf1" stroke="#17a2b8" stroke-width="2"/>
+  <text x="700" y="198" text-anchor="middle" font-size="13" font-weight="bold" fill="#0c5460">llm-parent  (super-pom repo)</text>
+  <text x="700" y="215" text-anchor="middle" font-size="10" fill="#0c5460">com.org.llm : llm-parent : 1.0.0</text>
+  <!-- Parent contents -->
+  <text x="548" y="240" font-size="10" fill="#555">dependencyManagement:</text>
+  <text x="558" y="256" font-size="10" fill="#333">▸ imports llm-bom</text>
+  <text x="548" y="275" font-size="10" fill="#555">build / plugins (active for all children):</text>
+  <text x="558" y="291" font-size="10" fill="#333">▸ spring-boot-maven-plugin  (build-info)</text>
+  <text x="558" y="306" font-size="10" fill="#333">▸ git-commit-id-maven-plugin  (revision)</text>
+  <text x="558" y="321" font-size="10" fill="#333">▸ maven-compiler-plugin  (lombok + config-proc)</text>
+  <text x="548" y="340" font-size="10" fill="#555">pluginManagement (opt-in):</text>
+  <text x="558" y="356" font-size="10" fill="#333">▸ jacoco-maven-plugin  0.8.13  (prepare-agent + report)</text>
+
+  <!-- ======== Arrows: spring-boot → llm-parent ======== -->
+  <!-- parent inheritance arrow -->
+  <line x1="450" y1="130" x2="680" y2="173" stroke="#17a2b8" stroke-width="1.8" stroke-dasharray="5,3"/>
+  <polygon points="680,173 672,165 676,176" fill="#17a2b8"/>
+  <text x="572" y="153" font-size="10" fill="#17a2b8" transform="rotate(-9,572,153)">inherits</text>
+
+  <!-- import arrow: llm-bom → llm-parent -->
+  <line x1="371" y1="275" x2="528" y2="275" stroke="#ffc107" stroke-width="2"/>
+  <polygon points="528,275 518,270 518,280" fill="#ffc107"/>
+  <text x="420" y="268" font-size="10" fill="#856404">imports BOM</text>
+
+  <!-- ======== Child modules row ======== -->
+  <!-- 7 boxes in two rows -->
+
+  <!-- Row labels -->
+  <text x="30" y="418" font-size="11" font-weight="bold" fill="#444">Services inheriting llm-parent:</text>
+
+  <!-- Module boxes row 1 -->
+  <rect x="30"  y="430" width="115" height="44" rx="6" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="87"  y="448" text-anchor="middle" font-size="9" font-weight="bold" fill="#155724">llm-gateway</text>
+  <text x="87"  y="462" text-anchor="middle" font-size="8" fill="#155724">WebFlux · Spring AI</text>
+
+  <rect x="155" y="430" width="115" height="44" rx="6" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="212" y="448" text-anchor="middle" font-size="9" font-weight="bold" fill="#155724">llm-chat</text>
+  <text x="212" y="462" text-anchor="middle" font-size="8" fill="#155724">MVC · Spring AI · Redis</text>
+
+  <rect x="280" y="430" width="115" height="44" rx="6" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="337" y="448" text-anchor="middle" font-size="9" font-weight="bold" fill="#155724">llm-rag-pipeline</text>
+  <text x="337" y="462" text-anchor="middle" font-size="8" fill="#155724">OpenSearch · OCR</text>
+
+  <rect x="405" y="430" width="115" height="44" rx="6" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="462" y="448" text-anchor="middle" font-size="9" font-weight="bold" fill="#155724">llm-rag-vectorless</text>
+  <text x="462" y="462" text-anchor="middle" font-size="8" fill="#155724">Anthropic · PDFBox</text>
+
+  <rect x="530" y="430" width="115" height="44" rx="6" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="587" y="448" text-anchor="middle" font-size="9" font-weight="bold" fill="#155724">llm-rag-graph</text>
+  <text x="587" y="462" text-anchor="middle" font-size="8" fill="#155724">Neo4j · Anthropic SDK</text>
+
+  <rect x="655" y="430" width="115" height="44" rx="6" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="712" y="448" text-anchor="middle" font-size="9" font-weight="bold" fill="#155724">llm-mcp-client</text>
+  <text x="712" y="462" text-anchor="middle" font-size="8" fill="#155724">MCP · Resilience4j</text>
+
+  <rect x="780" y="430" width="90" height="44" rx="6" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="825" y="451" text-anchor="middle" font-size="9" font-weight="bold" fill="#155724">mcp-server-*</text>
+  <text x="825" y="465" text-anchor="middle" font-size="8" fill="#155724">(7 services)</text>
+
+  <!-- Row 2: mcp servers detail -->
+  <rect x="30"  y="510" width="100" height="36" rx="5" fill="#e2d9f3" stroke="#6f42c1" stroke-width="1"/>
+  <text x="80"  y="525" text-anchor="middle" font-size="8" fill="#3d1a78">mcp-server</text>
+  <text x="80"  y="538" text-anchor="middle" font-size="8" fill="#3d1a78">hr-service</text>
+
+  <rect x="140" y="510" width="100" height="36" rx="5" fill="#e2d9f3" stroke="#6f42c1" stroke-width="1"/>
+  <text x="190" y="525" text-anchor="middle" font-size="8" fill="#3d1a78">mcp-server</text>
+  <text x="190" y="538" text-anchor="middle" font-size="8" fill="#3d1a78">ticket-service</text>
+
+  <rect x="250" y="510" width="100" height="36" rx="5" fill="#e2d9f3" stroke="#6f42c1" stroke-width="1"/>
+  <text x="300" y="525" text-anchor="middle" font-size="8" fill="#3d1a78">mcp-server</text>
+  <text x="300" y="538" text-anchor="middle" font-size="8" fill="#3d1a78">notification</text>
+
+  <rect x="360" y="510" width="100" height="36" rx="5" fill="#e2d9f3" stroke="#6f42c1" stroke-width="1"/>
+  <text x="410" y="525" text-anchor="middle" font-size="8" fill="#3d1a78">mcp-server</text>
+  <text x="410" y="538" text-anchor="middle" font-size="8" fill="#3d1a78">deployment</text>
+
+  <rect x="470" y="510" width="100" height="36" rx="5" fill="#e2d9f3" stroke="#6f42c1" stroke-width="1"/>
+  <text x="520" y="525" text-anchor="middle" font-size="8" fill="#3d1a78">mcp-server</text>
+  <text x="520" y="538" text-anchor="middle" font-size="8" fill="#3d1a78">travel</text>
+
+  <rect x="580" y="510" width="100" height="36" rx="5" fill="#e2d9f3" stroke="#6f42c1" stroke-width="1"/>
+  <text x="630" y="525" text-anchor="middle" font-size="8" fill="#3d1a78">mcp-server</text>
+  <text x="630" y="538" text-anchor="middle" font-size="8" fill="#3d1a78">github</text>
+
+  <rect x="690" y="510" width="100" height="36" rx="5" fill="#e2d9f3" stroke="#6f42c1" stroke-width="1"/>
+  <text x="740" y="525" text-anchor="middle" font-size="8" fill="#3d1a78">mcp-server</text>
+  <text x="740" y="538" text-anchor="middle" font-size="8" fill="#3d1a78">gmail</text>
+
+  <!-- Arrow: llm-parent → modules (one representative arrow) -->
+  <line x1="700" y1="361" x2="450" y2="428" stroke="#28a745" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="450,428 444,417 455,420" fill="#28a745"/>
+  <text x="600" y="400" font-size="10" fill="#28a745">parent inheritance</text>
+
+  <!-- Legend -->
+  <rect x="30" y="600" width="840" height="80" rx="6" fill="#fff" stroke="#dee2e6" stroke-width="1"/>
+  <text x="450" y="618" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Key Rules</text>
+  <text x="50"  y="636" font-size="10" fill="#555">✓  All dependency versions live exclusively in llm-bom</text>
+  <text x="50"  y="651" font-size="10" fill="#555">✓  All shared plugin config lives in llm-parent</text>
+  <text x="50"  y="666" font-size="10" fill="#555">✓  Module poms declare only &lt;parent&gt; + &lt;dependencies&gt; (no versions, no plugins, no repositories)</text>
+  <text x="470" y="636" font-size="10" fill="#555">✓  jacoco is opt-in via pluginManagement (declared only where needed)</text>
+  <text x="470" y="651" font-size="10" fill="#555">✓  Spring Milestones repo is declared once in llm-parent</text>
+  <text x="470" y="666" font-size="10" fill="#555">✓  Install order: mvn install in maven-bom → super-pom → service repos</text>
+
+</svg>
