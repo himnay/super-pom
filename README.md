@@ -1,103 +1,128 @@
-# LLM Platform — Parent POM (`llm-parent`)
+# super-pom — Shared Parent POM for `com.org.llm` Services
 
-This repository contains the **corporate parent POM** for all LLM platform services. It sits at the top of every service's inheritance chain and provides:
-
-- A single import of [`llm-bom`](../maven-bom) so all dependency versions are resolved centrally.
-- Pre-configured shared plugins active for every child module.
-- The Spring Milestones repository declaration (no per-module repetition).
+This repository is the **corporate parent POM** for all LLM platform services.
+It sits at the top of every service's Maven inheritance chain.
 
 ## Architecture
 
 ![Maven BOM + Parent POM Design](design.svg)
 
-### Three-tier structure
-
 ```
-spring-boot-starter-parent (4.1.0)
+org.springframework.boot:spring-boot-starter-parent:4.1.0
         │  inherits
         ▼
-  llm-parent  ◄──── imports ──── llm-bom
-  (this repo)                   (maven-bom repo)
+  com.org.llm:super-pom:1.0.0   ◄──── imports ──── com.org.learning:learning-bom:1.0.0
+  (this repo)
         │  parent
         ├──── llm-gateway
         ├──── llm-chat
         ├──── llm-rag-pipeline
-        ├──── llm-rag-vectorless
-        ├──── llm-rag-graph
-        ├──── llm-mcp-client
-        ├──── mcp-server-hr-service
-        ├──── mcp-server-ticket-service
-        ├──── mcp-server-notification-service
-        ├──── mcp-server-deployment-service
-        ├──── mcp-server-travel-service
-        ├──── mcp-server-github-service
-        └──── mcp-server-gmail-service
+        └──── (all other com.org.llm services)
 ```
 
-### What lives where
+## How to inherit
 
-| Concern | Where |
+```xml
+<parent>
+    <groupId>com.org.llm</groupId>
+    <artifactId>super-pom</artifactId>
+    <version>1.0.0</version>
+    <relativePath/>
+</parent>
+```
+
+No `<dependencyManagement>`, `<repositories>`, or plugin declarations are needed
+in child modules — everything flows down from this POM.
+
+## What this POM provides
+
+### Compiler settings
+
+| Property | Value |
 |---|---|
-| All dependency versions | `llm-bom` → `<dependencyManagement>` |
-| Platform BOM imports (Spring Cloud, Spring AI, Testcontainers) | `llm-bom` → `<dependencyManagement>` |
-| `java.version` property | `llm-parent` → `<properties>` |
-| `spring-boot-maven-plugin` (build-info) | `llm-parent` → `<build><plugins>` |
-| `git-commit-id-maven-plugin` | `llm-parent` → `<build><plugins>` |
-| `maven-compiler-plugin` (Lombok + config-processor) | `llm-parent` → `<build><plugins>` |
-| `jacoco-maven-plugin` (opt-in via pluginManagement) | `llm-parent` → `<build><pluginManagement>` |
-| Spring Milestones repository | `llm-parent` → `<repositories>` |
-| Module-specific dependencies | each service `pom.xml` → `<dependencies>` |
+| `java.version` | 25 |
+| `maven.compiler.release` | 25 |
 
-## Rules for child module POMs
+### Active plugins (run automatically in every child module)
 
-Each service pom must:
+| Plugin | Phase | Purpose |
+|---|---|---|
+| `spring-boot-maven-plugin` | package | Executable fat-jar + `build-info` actuator endpoint |
+| `git-commit-id-maven-plugin` | initialize | Generates `git.properties` for the `/info` actuator |
+| `maven-compiler-plugin` | compile | Wires Lombok + Spring config-processor annotation paths |
+| `maven-enforcer-plugin` | validate | Enforces build-environment rules (see below) |
+| `dependency-check-maven` | verify | OWASP CVE scan; fails build on CVSS >= 7 |
+| `maven-surefire-plugin` | test | Unit tests with Java 25 `--add-opens` flag |
+| `maven-failsafe-plugin` | integration-test + verify | Integration tests with Java 25 `--add-opens` flag |
 
-1. **Declare `llm-parent` as parent** (no `<relativePath>` — resolved from local/remote repo):
-   ```xml
-   <parent>
-       <groupId>com.org.llm</groupId>
-       <artifactId>llm-parent</artifactId>
-       <version>1.0.0</version>
-       <relativePath/>
-   </parent>
-   ```
+### Plugin-management (opt-in — child modules declare to activate)
 
-2. **List only `<dependencies>` — no `<version>` tags** (all versions managed by the BOM).
+| Plugin | Use-case |
+|---|---|
+| `jacoco-maven-plugin` | Code-coverage report (prepare-agent + report) |
+| `spotless-maven-plugin` | Code formatting |
+| `build-helper-maven-plugin` | Extra source directories |
+| `avro-maven-plugin` | Avro schema code generation |
+| `openapi-generator-maven-plugin` | OpenAPI client/server stub generation |
+| `dependency-check-maven` | Base config overrideable per child module |
 
-3. **No `<dependencyManagement>`**, **no `<repositories>`**, **no plugin declarations** (unless opting into jacoco or adding a module-specific check execution).
+To opt into JaCoCo, a child module only needs:
 
-4. To enable JaCoCo coverage, add only:
-   ```xml
-   <build>
-       <plugins>
-           <plugin>
-               <groupId>org.jacoco</groupId>
-               <artifactId>jacoco-maven-plugin</artifactId>
-               <!-- prepare-agent + report come from pluginManagement -->
-               <!-- optionally add a <check> execution here -->
-           </plugin>
-       </plugins>
-   </build>
-   ```
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <!-- prepare-agent + report executions inherited from pluginManagement -->
+        </plugin>
+    </plugins>
+</build>
+```
+
+## Enforcer rules
+
+The `maven-enforcer-plugin` runs at the `validate` phase and fails immediately if:
+
+- **`requireJavaVersion [25,)`** — the build JDK is older than Java 25.
+  Caught early so an incompatible JDK never produces a confusing compile error.
+- **`requireMavenVersion [3.9,)`** — Maven older than 3.9 is used.
+  Ensures all developers share reproducible build semantics.
+- **`banDuplicatePomDependencyVersions`** — the same dependency appears more
+  than once with conflicting versions in a `<dependencies>` block.
+  Catches copy-paste errors that would otherwise silently produce the wrong jar.
+
+## How to suppress an OWASP false positive
+
+1. Inspect the HTML report at `target/dependency-check-report.html` to confirm
+   the CVE is a false positive.
+2. Add a suppression entry in `owasp-suppressions.xml` at the root of the
+   affected module (or at the repo root to apply everywhere):
+
+```xml
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <notes>False positive — library does not use the vulnerable code path.</notes>
+        <packageUrl regex="true">^pkg:maven/com\.example/my\-lib@.*$</packageUrl>
+        <cve>CVE-2024-12345</cve>
+    </suppress>
+</suppressions>
+```
+
+3. Commit the file. The OWASP plugin execution references it via
+   `<suppressionFiles>owasp-suppressions.xml</suppressionFiles>`.
 
 ## Build order
 
-These two POMs must be installed to the local Maven repo before building any service:
+Install these two POMs before building any service:
 
 ```bash
 # 1. Install the BOM first
-cd ../maven-bom && mvn install
+cd /path/to/maven-bom && mvn install
 
 # 2. Install the parent
-cd ../super-pom && mvn install
+cd /path/to/super-pom && mvn install
 
 # 3. Build any service
-cd ../LLM/llm-chat && mvn package
+cd /path/to/llm-chat && mvn package
 ```
-
-## Coordinates
-
-| Artifact | GroupId | ArtifactId | Version |
-|---|---|---|---|
-| BOM | `com.org.llm` | `llm-bom` | `1.0.0` |
-| Parent | `com.org.llm` | `llm-parent` | `1.0.0` |
