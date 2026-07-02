@@ -51,7 +51,6 @@ in child modules — everything flows down from this POM.
 | `git-commit-id-maven-plugin` | initialize | Generates `git.properties` for the `/info` actuator |
 | `maven-compiler-plugin` | compile | Wires Lombok + Spring config-processor annotation paths |
 | `maven-enforcer-plugin` | validate | Enforces build-environment rules (see below) |
-| `dependency-check-maven` | verify | OWASP CVE scan; fails build on CVSS >= 7 |
 | `maven-surefire-plugin` | test | Unit tests with Java 25 `--add-opens` flag |
 | `maven-failsafe-plugin` | integration-test + verify | Integration tests with Java 25 `--add-opens` flag |
 
@@ -79,6 +78,16 @@ To opt into JaCoCo, a child module only needs:
     </plugins>
 </build>
 ```
+
+## Profiles (inherited by every child module)
+
+| Profile | Command | What it does |
+|---|---|---|
+| `security-scan` | `mvn verify -Psecurity-scan` | OWASP `dependency-check-maven` CVE scan; fails build on CVSS >= 8. Needs network access to the NVD feed — set `NVD_API_KEY` env var to avoid rate limiting. HTML + JSON reports in `target/`. |
+| `mutation-test` | `mvn test -Pmutation-test` | PIT mutation testing (JUnit 5). Scope runs with `-Dpitest.targetClasses=com.org.foo.*` and `-Dpitest.targetTests=...` to keep them fast. HTML report in `target/pit-reports/`. |
+
+Child modules no longer need their own `security-scan` profile — declare nothing
+and run the command above from the module directory.
 
 ## Enforcer rules
 
