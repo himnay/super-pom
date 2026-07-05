@@ -28,7 +28,7 @@
         <pitest-maven.version>1.19.1</pitest-maven.version>
         <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
 
-        <learning-bom.version>1.0.0</learning-bom.version>
+        <learning-bom.version>1.1.0</learning-bom.version>
     </properties>
 
     <!-- Import the BOM so all managed versions flow to child modules -->
