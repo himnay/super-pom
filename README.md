@@ -1,5 +1,7 @@
 # super-pom — Corporate Parent POM for `com.org.llm` Services
 
+<img src="image/maven-logo.png" alt="logo" width="80"/>
+
 ## Table of contents
 
 - [Purpose and scope](#purpose-and-scope)
