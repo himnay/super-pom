@@ -22,7 +22,8 @@
 16. 🏷️ [Versioning and upgrade policy](#versioning-and-upgrade-policy)
 17. 🔹 [Known gaps / staleness notes](#known-gaps--staleness-notes)
 
-## Purpose and scope
+<a id="purpose-and-scope"></a>
+## 1. 🔹 Purpose and scope
 
 `super-pom` is the top-level Maven `<parent>` for every service in the `com.org.llm`
 platform (gateway, chat, RAG pipelines, MCP clients/servers, and the
@@ -48,7 +49,8 @@ It does **not** own application dependency versions directly (those live in
 `learning-bom`, a separate repository — see below), and it does not contain
 any application source code.
 
-## Why a shared parent POM at all
+<a id="why-a-shared-parent-pom-at-all"></a>
+## 2. 🔨 Why a shared parent POM at all
 
 In a multi-repo organization with many Spring Boot services, three problems
 recur constantly if each service manages its own build:
@@ -78,7 +80,8 @@ This is the standard "corporate/organizational parent POM" pattern used
 across most non-trivial Spring Boot shops, sitting one level *below* Spring's
 own `spring-boot-starter-parent` and one level *above* individual services.
 
-## The two-layer dependency management model
+<a id="the-two-layer-dependency-management-model"></a>
+## 3. 🤖 The two-layer dependency management model
 
 This is the single most important architectural fact about this repository,
 and it is easy to miss on a first read of the POM: **`super-pom` has two
@@ -182,7 +185,8 @@ import. In practice this means a leaf repo like `llm-text2sql` can declare
 with **no version tag at all**, and the correct, organization-approved
 version resolves automatically.
 
-## Architecture diagram
+<a id="architecture-diagram"></a>
+## 4. 🏗️ Architecture diagram
 
 `design.svg` (embedded below) is the existing hand-drawn architecture
 diagram for this repository. It is **partially stale** relative to the
@@ -200,7 +204,8 @@ vs. the real `learning-bom`, `llm-parent` vs. the real `super-pom`, and a
 below describe the **current, actual** state of this `pom.xml` and should be
 treated as the source of truth until `design.svg` is redrawn.
 
-### Inheritance chain
+<a id="inheritance-chain"></a>
+### 5. 🔹 Inheritance chain
 
 ```mermaid
 graph TD
@@ -257,7 +262,8 @@ flowchart LR
     D --> E[Every com.org.llm leaf service]
 ```
 
-## Coordinates and versioning
+<a id="coordinates-and-versioning"></a>
+## 6. 🏷️ Coordinates and versioning
 
 | Field | Value |
 |---|---|
@@ -272,7 +278,8 @@ repository and never produces a jar — only a `pom.xml` is installed to the
 local/remote repository. Every downstream service references this exact
 `groupId:artifactId:version` triple in its own `<parent>` block.
 
-## Properties
+<a id="properties"></a>
+## 7. ⚙️ Properties
 
 | Property | Value | Purpose |
 |---|---|---|
@@ -292,7 +299,8 @@ inline on each plugin) means a single-line change here updates the version
 everywhere the property is referenced, and makes `mvn versions:*` tooling
 able to detect and bump them mechanically.
 
-## Repositories and plugin repositories
+<a id="repositories-and-plugin-repositories"></a>
+## 8. 🔹 Repositories and plugin repositories
 
 ```xml
 <repositories>
@@ -322,7 +330,8 @@ important consistency guarantee, since a missing repository declaration in
 one service but not another is a classic source of "works on my machine but
 not in CI" build failures.
 
-## Active plugins (wired for every child, no opt-in required)
+<a id="active-plugins-wired-for-every-child-no-opt-in-required"></a>
+## 9. 🔹 Active plugins (wired for every child, no opt-in required)
 
 These plugins live in `<build><plugins>` (as opposed to
 `<pluginManagement>`), which means Maven activates them for **every single
@@ -549,7 +558,8 @@ flag here means no service has to rediscover this the hard way after
 bumping its JDK — it is already handled for both unit and integration test
 execution.
 
-## pluginManagement (opt-in plugins)
+<a id="pluginmanagement-opt-in-plugins"></a>
+## 10. 🔹 pluginManagement (opt-in plugins)
 
 Everything in `<build><pluginManagement>` provides a **version pin and
 default configuration**, but does **not** activate the plugin for any
@@ -588,7 +598,8 @@ Example — opting into JaCoCo from a child module:
 </build>
 ```
 
-## Profiles
+<a id="profiles"></a>
+## 11. ⚙️ Profiles
 
 Both profiles below are defined once, here, and are automatically
 **inherited** by every child module (Maven profiles declared in a parent
@@ -742,7 +753,8 @@ important package (e.g. business-critical logic before a release), or a
 CI job that only runs when core logic packages change, rather than on
 every commit.
 
-## Enforcer rules in detail
+<a id="enforcer-rules-in-detail"></a>
+## 12. 🔹 Enforcer rules in detail
 
 (See also the [`maven-enforcer-plugin` section](#maven-enforcer-plugin)
 above for the full XML and phase details.) Summarized for quick reference:
@@ -757,7 +769,8 @@ All three run at the `validate` phase (the first lifecycle phase), so a
 misconfigured environment is caught before compilation, tests, or packaging
 ever begin.
 
-## How a leaf repo consumes this POM
+<a id="how-a-leaf-repo-consumes-this-pom"></a>
+## 13. 🔨 How a leaf repo consumes this POM
 
 A leaf service opts into everything described in this document with
 nothing more than a `<parent>` declaration. For example, `llm-text2sql`'s
@@ -792,7 +805,8 @@ example: a brand-new service repository can be created with a ~15-line
 `pom.xml` and immediately inherit the organization's full toolchain policy,
 build provenance, and quality-gate tooling.
 
-## Build and install order
+<a id="build-and-install-order"></a>
+## 14. 🔨 Build and install order
 
 Because `super-pom` imports `learning-bom` and both are local,
 independently-versioned repositories (not yet necessarily published to a
@@ -817,7 +831,8 @@ pipeline instead of a manual local install, and a leaf service simply
 resolves `com.org.llm:super-pom:1.0.0` and `com.org.learning:learning-bom:1.1.0`
 from the remote repository.
 
-## Suppressing an OWASP false positive
+<a id="suppressing-an-owasp-false-positive"></a>
+## 15. 🔹 Suppressing an OWASP false positive
 
 1. Run `mvn verify -Psecurity-scan` and inspect the generated HTML report
    at `target/dependency-check-report.html` to confirm the flagged CVE is
@@ -842,7 +857,8 @@ from the remote repository.
    it via a `<suppressionFiles>` configuration entry so subsequent scans
    honor the suppression.
 
-## Versioning and upgrade policy
+<a id="versioning-and-upgrade-policy"></a>
+## 16. 🏷️ Versioning and upgrade policy
 
 - **`super-pom`'s own version** (`1.0.0`) should be bumped whenever plugin
   configuration, enforcer rules, or the Spring Boot parent version changes
@@ -856,7 +872,8 @@ from the remote repository.
   automatic/floating; it is pinned per leaf repo, the same way any Maven
   dependency version is pinned.
 
-## Known gaps / staleness notes
+<a id="known-gaps--staleness-notes"></a>
+## 17. 🔹 Known gaps / staleness notes
 
 `design.svg` was accurate to an earlier iteration of this POM but has
 drifted from the current `pom.xml` in the following ways. It is left in
