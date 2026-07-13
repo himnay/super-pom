@@ -55,6 +55,8 @@ any application source code.
 In a multi-repo organization with many Spring Boot services, three problems
 recur constantly if each service manages its own build:
 
+<ul>
+
 - **Version drift.** Repo A upgrades to Spring Boot 4.1.0 and Java 25; repo B
   is still on Boot 3.3 and Java 17. Nothing enforces consistency, and CI in
   one repo can pass while a nearly-identical repo silently uses a different,
@@ -68,6 +70,8 @@ recur constantly if each service manages its own build:
 - **Inconsistent quality gates.** Whether a repo runs dependency vulnerability
   scanning, mutation testing, or code coverage becomes a per-repo decision
   made by whoever set up that repo, rather than an organizational default.
+
+</ul>
 
 A shared parent POM solves all three by giving every service a single common
 ancestor. Bumping the Spring Boot version, adding a new enforcer rule, or
@@ -102,6 +106,8 @@ other, each doing a different job.**
 `super-pom` inherits directly from Spring's own starter parent. This single
 line is what gives every downstream service, transitively:
 
+<ul>
+
 - The full `spring-boot-dependencies` BOM (hundreds of managed dependency
   versions for anything with a `spring-boot-starter-*` artifact, plus common
   third-party libraries Spring itself depends on or commonly pairs with).
@@ -111,6 +117,8 @@ line is what gives every downstream service, transitively:
 - Spring's default `<properties>` for overriding individual dependency
   versions (e.g. `<lombok.version>`) if ever needed.
 - UTF-8 source/reporting encoding and other baseline sane defaults.
+
+</ul>
 
 Because this is a Maven **`<parent>`** relationship (not an import), it also
 means `super-pom` and everything beneath it participates in Spring Boot's
@@ -143,6 +151,8 @@ every child module without that module writing an explicit `<version>` tag.
 
 Reading `learning-bom`'s own `pom.xml`, its `<dependencyManagement>` imports:
 
+<ul>
+
 - `spring-boot-dependencies` (yes — a second, explicit import of the same
   BOM Layer 1 already provides transitively via parent inheritance; Maven's
   "nearest declaration wins" / first-imported-wins rule means this is safe
@@ -155,6 +165,8 @@ Reading `learning-bom`'s own `pom.xml`, its `<dependencyManagement>` imports:
   any of the above BOMs: Oracle JDBC (`ojdbc17`), Resilience4j modules,
   `micrometer-jvm-extras`, Micrometer context-propagation, Logstash's
   structured-logging encoder, ShedLock (distributed scheduling), and more.
+
+</ul>
 
 **Why two layers instead of one?** Spring's BOM covers "the Spring
 ecosystem." It has no opinion about Oracle's JDBC driver version, this
@@ -312,6 +324,8 @@ able to detect and bump them mechanically.
 </pluginRepositories>
 ```
 
+<ul>
+
 - **`spring-milestones`** (`https://repo.spring.io/milestone`, snapshots
   disabled) — required because this POM pins Spring Boot `4.1.0` and
   related Spring ecosystem artifacts that may, at any point in time, be
@@ -323,6 +337,8 @@ able to detect and bump them mechanically.
   Maven repository, needed by any service that pulls in Kafka Avro/Schema
   Registry client artifacts that are not mirrored to Central. Declared once
   here so no individual Kafka-consuming service has to repeat it.
+
+</ul>
 
 Declaring these once, in the parent, means every child module resolves
 against the same repository set with no per-repo configuration — an
@@ -362,6 +378,8 @@ their behavior.
 
 Two things happen here:
 
+<ul>
+
 - The `build-info` goal generates `META-INF/build-info.properties` at build
   time — group, artifact, name, version, and build timestamp. Spring Boot
   Actuator's `/actuator/info` endpoint reads this file automatically and
@@ -376,6 +394,8 @@ Two things happen here:
   runtime dependency of the shipped artifact; shipping it would bloat the
   jar and could theoretically expose annotation-processing classes at
   runtime for no benefit.
+
+</ul>
 
 ### `git-commit-id-maven-plugin`
 
@@ -437,6 +457,8 @@ centrally.
 Explicitly wires two annotation processors onto the compiler's processor
 path:
 
+<ul>
+
 - **Lombok** — so `@Getter`, `@Builder`, `@Slf4j`, etc. work in every child
   module without that module adding its own `annotationProcessorPaths`
   block (a notoriously fiddly piece of Maven configuration to get right,
@@ -448,6 +470,8 @@ path:
   properties. Centralizing this means any service that defines
   `@ConfigurationProperties` gets IDE support automatically, with no
   per-service compiler configuration.
+
+</ul>
 
 Note: version and general compiler behavior (source/target/release) are
 inherited from `spring-boot-starter-parent` combined with the
@@ -491,6 +515,8 @@ silently no-ops on an unsupported toolchain).
 
 Three rules are active:
 
+<ul>
+
 - **`requireJavaVersion [21,)`** — build JDK must be Java 21 or newer (an
   open-ended range; any future JDK satisfies it too). Note this is a
   *floor*, and is deliberately looser than the `java.version=25` property
@@ -505,6 +531,8 @@ Three rules are active:
   block with different versions declared — a classic copy-paste mistake
   that would otherwise silently resolve to whichever declaration Maven
   happens to pick, shipping the wrong jar with no warning.
+
+</ul>
 
 Centralizing enforcer rules here means the whole organization's minimum
 toolchain requirements are defined in one place and can be raised (e.g. from
@@ -650,6 +678,8 @@ mvn verify -Psecurity-scan
 
 Configuration wired here:
 
+<ul>
+
 - **`failBuildOnCVSS=8`** — the build fails if any identified vulnerability
   scores 8.0 or higher on the CVSS severity scale (i.e. "High" or
   "Critical"), but does not fail on lower-severity findings, which are
@@ -661,6 +691,8 @@ Configuration wired here:
   callers aggressively; setting an `NVD_API_KEY` environment variable
   (obtained by any team member from NVD) avoids scan runs being throttled
   or failing outright due to rate limiting.
+
+</ul>
 
 **When a team runs this:** typically not on every commit (the NVD feed
 fetch and full dependency graph analysis is comparatively slow), but on a
@@ -728,6 +760,8 @@ mvn test -Pmutation-test
 
 Configuration wired here:
 
+<ul>
+
 - `pitest-junit5-plugin` dependency — required for PIT to discover and run
   JUnit 5 (Jupiter) tests; PIT's core engine predates JUnit 5 and needs this
   bridge.
@@ -737,6 +771,8 @@ Configuration wired here:
 - HTML + XML report output, non-timestamped (so the report path is stable
   across runs, e.g. for CI artifact publishing or IDE viewing) at
   `target/pit-reports/`.
+
+</ul>
 
 **When a team runs this:** mutation testing is comparatively slow (it
 recompiles and re-runs the test suite once per mutant), so it is normally
@@ -860,6 +896,8 @@ from the remote repository.
 <a id="versioning-and-upgrade-policy"></a>
 ## 16. 🏷️ Versioning and upgrade policy
 
+<ul>
+
 - **`super-pom`'s own version** (`1.0.0`) should be bumped whenever plugin
   configuration, enforcer rules, or the Spring Boot parent version changes
   — i.e. whenever the *build behavior* every child inherits changes.
@@ -872,6 +910,8 @@ from the remote repository.
   automatic/floating; it is pinned per leaf repo, the same way any Maven
   dependency version is pinned.
 
+</ul>
+
 <a id="known-gaps--staleness-notes"></a>
 ## 17. 🔹 Known gaps / staleness notes
 
@@ -881,6 +921,8 @@ place as a still-useful high-level visual (the overall shape — Spring Boot
 parent, a BOM import from one side, this parent POM, leaf services below —
 remains correct) but the specifics below should be read from this document
 and the actual `pom.xml`, not the diagram, until it is redrawn:
+
+<ul>
 
 - The diagram labels the imported BOM `llm-bom` (`com.org.llm:llm-bom:1.0.0`).
   The real imported artifact is `com.org.learning:learning-bom`, currently
@@ -911,6 +953,8 @@ and the actual `pom.xml`, not the diagram, until it is redrawn:
   `~/projects` differ in several cases (e.g. `llm-rag`, `llm-mcp`,
   `llm-mcp-gateway`, `llm-text2sql`) though the overall pattern of "many
   services, one shared parent" still holds.
+
+</ul>
 
 If/when `design.svg` is redrawn, the Mermaid diagrams in this document can
 serve as the content spec for the refresh.
