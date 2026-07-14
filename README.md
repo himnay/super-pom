@@ -217,7 +217,7 @@ below describe the **current, actual** state of this `pom.xml` and should be
 treated as the source of truth until `design.svg` is redrawn.
 
 <a id="inheritance-chain"></a>
-### 5. 🔹 Inheritance chain
+## 5. 🔹 Inheritance chain
 
 ```mermaid
 graph TD
