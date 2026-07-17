@@ -277,13 +277,13 @@ flowchart LR
 <a id="coordinates-and-versioning"></a>
 ## 6. 🏷️ Coordinates and versioning
 
-| Field | Value |
-|---|---|
-| `groupId` | `com.org.llm` |
-| `artifactId` | `super-pom` |
-| `version` | `1.0.0` |
-| `packaging` | `pom` |
-| `name` | `LLM :: Parent` |
+| Field        | Value           |
+|--------------|-----------------|
+| `groupId`    | `com.org.llm`   |
+| `artifactId` | `super-pom`     |
+| `version`    | `1.0.0`         |
+| `packaging`  | `pom`           |
+| `name`       | `LLM :: Parent` |
 
 Because `packaging` is `pom`, Maven never expects source code in this
 repository and never produces a jar — only a `pom.xml` is installed to the
@@ -293,18 +293,18 @@ local/remote repository. Every downstream service references this exact
 <a id="properties"></a>
 ## 7. ⚙️ Properties
 
-| Property | Value | Purpose |
-|---|---|---|
-| `java.version` | `25` | Baseline Java language/runtime version for every child module. |
-| `maven.compiler.release` | `${java.version}` (25) | Passed to `javac --release`; guarantees bytecode + API compatibility with Java 25, not just source compatibility. |
-| `avro-maven-plugin.version` | `1.12.0` | Version pin for the opt-in Avro schema-to-Java code generator. |
-| `build-helper-maven-plugin.version` | `3.6.0` | Version pin for the opt-in extra-source-directory helper plugin. |
-| `spotless-maven-plugin.version` | `2.46.1` | Version pin for the opt-in code formatter. |
-| `openapi-generator-maven-plugin.version` | `7.16.0` | Version pin for the opt-in OpenAPI client/server stub generator. |
-| `dependency-check-maven.version` | `12.1.0` | Version pin for the OWASP CVE scanner used by the `security-scan` profile. |
-| `pitest-maven.version` | `1.19.1` | Version pin for the PIT mutation-testing engine used by the `mutation-test` profile. |
-| `pitest-junit5-plugin.version` | `1.2.3` | JUnit 5 integration shim required for PIT to discover JUnit 5 tests. |
-| `learning-bom.version` | `1.1.0` | Pinned version of the imported organizational BOM (see the two-layer model above). |
+| Property                                 | Value                  | Purpose                                                                                                           |
+|------------------------------------------|------------------------|-------------------------------------------------------------------------------------------------------------------|
+| `java.version`                           | `25`                   | Baseline Java language/runtime version for every child module.                                                    |
+| `maven.compiler.release`                 | `${java.version}` (25) | Passed to `javac --release`; guarantees bytecode + API compatibility with Java 25, not just source compatibility. |
+| `avro-maven-plugin.version`              | `1.12.0`               | Version pin for the opt-in Avro schema-to-Java code generator.                                                    |
+| `build-helper-maven-plugin.version`      | `3.6.0`                | Version pin for the opt-in extra-source-directory helper plugin.                                                  |
+| `spotless-maven-plugin.version`          | `2.46.1`               | Version pin for the opt-in code formatter.                                                                        |
+| `openapi-generator-maven-plugin.version` | `7.16.0`               | Version pin for the opt-in OpenAPI client/server stub generator.                                                  |
+| `dependency-check-maven.version`         | `12.1.0`               | Version pin for the OWASP CVE scanner used by the `security-scan` profile.                                        |
+| `pitest-maven.version`                   | `1.19.1`               | Version pin for the PIT mutation-testing engine used by the `mutation-test` profile.                              |
+| `pitest-junit5-plugin.version`           | `1.2.3`                | JUnit 5 integration shim required for PIT to discover JUnit 5 tests.                                              |
+| `learning-bom.version`                   | `1.1.0`                | Pinned version of the imported organizational BOM (see the two-layer model above).                                |
 
 Centralizing these as properties (rather than hard-coding version strings
 inline on each plugin) means a single-line change here updates the version
@@ -598,13 +598,13 @@ available centrally, but let each module decide if it needs it" — as
 opposed to the plugins in the previous section, which run unconditionally
 everywhere.
 
-| Plugin | Version | What it does | Notable pre-wired config |
-|---|---|---|---|
-| `build-helper-maven-plugin` | `3.6.0` | Adds extra source/test-source directories to the build (e.g. generated-sources folders not on the default path). | None beyond version pin. |
-| `avro-maven-plugin` | `1.12.0` | Compiles Avro `.avsc`/`.avdl` schema files into generated Java POJOs at build time. | None beyond version pin. |
-| `jacoco-maven-plugin` | `0.8.15` | Instruments tests to produce code-coverage data and an HTML/XML coverage report. | Two executions pre-wired: `prepare-agent` (attaches the coverage agent to the test JVM) and a `report` execution bound to the `verify` phase. A child module only has to declare the bare `<plugin>` element with matching `groupId`/`artifactId` — the executions are inherited. |
-| `spotless-maven-plugin` | `2.46.1` | Enforces and auto-applies consistent code formatting (imports, whitespace, etc.), typically wired to fail the build (`spotless:check`) or fix it (`spotless:apply`). | None beyond version pin — per-module formatter rules (e.g. which formatter/style) are left to the child. |
-| `openapi-generator-maven-plugin` | `7.16.0` | Generates client or server stub code from an OpenAPI/Swagger specification. | None beyond version pin — `inputSpec`/`generatorName`/output package are necessarily module-specific. |
+| Plugin                           | Version  | What it does                                                                                                                                                         | Notable pre-wired config                                                                                                                                                                                                                                                          |
+|----------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `build-helper-maven-plugin`      | `3.6.0`  | Adds extra source/test-source directories to the build (e.g. generated-sources folders not on the default path).                                                     | None beyond version pin.                                                                                                                                                                                                                                                          |
+| `avro-maven-plugin`              | `1.12.0` | Compiles Avro `.avsc`/`.avdl` schema files into generated Java POJOs at build time.                                                                                  | None beyond version pin.                                                                                                                                                                                                                                                          |
+| `jacoco-maven-plugin`            | `0.8.15` | Instruments tests to produce code-coverage data and an HTML/XML coverage report.                                                                                     | Two executions pre-wired: `prepare-agent` (attaches the coverage agent to the test JVM) and a `report` execution bound to the `verify` phase. A child module only has to declare the bare `<plugin>` element with matching `groupId`/`artifactId` — the executions are inherited. |
+| `spotless-maven-plugin`          | `2.46.1` | Enforces and auto-applies consistent code formatting (imports, whitespace, etc.), typically wired to fail the build (`spotless:check`) or fix it (`spotless:apply`). | None beyond version pin — per-module formatter rules (e.g. which formatter/style) are left to the child.                                                                                                                                                                          |
+| `openapi-generator-maven-plugin` | `7.16.0` | Generates client or server stub code from an OpenAPI/Swagger specification.                                                                                          | None beyond version pin — `inputSpec`/`generatorName`/output package are necessarily module-specific.                                                                                                                                                                             |
 
 Because these are opt-in, a service that has no Avro schemas or no OpenAPI
 spec pays zero build-time cost for these plugins — they simply never run —
@@ -795,11 +795,11 @@ every commit.
 (See also the [`maven-enforcer-plugin` section](#maven-enforcer-plugin)
 above for the full XML and phase details.) Summarized for quick reference:
 
-| Rule | Threshold | Fails the build when... |
-|---|---|---|
-| `requireJavaVersion` | `[21,)` | The build JDK is older than Java 21. |
-| `requireMavenVersion` | `[3.9,)` | Maven is older than 3.9. |
-| `banDuplicatePomDependencyVersions` | n/a | A `groupId:artifactId` appears more than once with conflicting versions in the same `<dependencies>` block. |
+| Rule                                | Threshold | Fails the build when...                                                                                     |
+|-------------------------------------|-----------|-------------------------------------------------------------------------------------------------------------|
+| `requireJavaVersion`                | `[21,)`   | The build JDK is older than Java 21.                                                                        |
+| `requireMavenVersion`               | `[3.9,)`  | Maven is older than 3.9.                                                                                    |
+| `banDuplicatePomDependencyVersions` | n/a       | A `groupId:artifactId` appears more than once with conflicting versions in the same `<dependencies>` block. |
 
 All three run at the `validate` phase (the first lifecycle phase), so a
 misconfigured environment is caught before compilation, tests, or packaging
