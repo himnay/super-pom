@@ -31,7 +31,6 @@
         <learning-bom.version>1.1.1</learning-bom.version>
     </properties>
 
-    <!-- Import the BOM so all managed versions flow to child modules -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -72,8 +71,6 @@
     </pluginRepositories>
 
     <build>
-        <!-- pluginManagement: version + default config for opt-in plugins (e.g. jacoco).
-             Child modules activate these by declaring the plugin in their <build><plugins>. -->
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -119,7 +116,6 @@
             </plugins>
         </pluginManagement>
 
-        <!-- plugins: active for every child module automatically -->
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -175,7 +171,6 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            <!-- (b) Enforcer: fail fast on wrong Java / Maven / duplicate deps -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -202,7 +197,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- (d) Surefire: Java 25 module-system compatibility -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -210,7 +204,6 @@
                     <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
                 </configuration>
             </plugin>
-            <!-- (e) Failsafe: integration tests with Java 25 module-system compatibility -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -231,8 +224,6 @@
     </build>
 
     <profiles>
-        <!-- OWASP dependency vulnerability scan: mvn verify -Psecurity-scan
-             Set NVD_API_KEY env var to avoid NVD rate limiting. -->
         <profile>
             <id>security-scan</id>
             <build>
@@ -261,8 +252,6 @@
             </build>
         </profile>
 
-        <!-- Mutation testing: mvn test -Pmutation-test
-             Scope with -Dpitest.targetClasses / -Dpitest.targetTests to keep runs fast. -->
         <profile>
             <id>mutation-test</id>
             <properties>
