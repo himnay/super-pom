@@ -1,8 +1,8 @@
-# <span style="color:hsl(55,68%,32%)">super-pom — Corporate Parent POM for `com.org.llm` Services</span>
+# <span style="color:hsl(55,80%,50%)">super-pom — Corporate Parent POM for `com.org.llm` Services</span>
 
 <img src="image/maven-logo.png" alt="logo" width="80"/>
 
-## <span style="color:hsl(67,68%,32%)">Table of contents</span>
+## <span style="color:hsl(193,80%,58%)">Table of contents</span>
 
 1. 🔹 [Purpose and scope](#purpose-and-scope)
 2. 🔨 [Why a shared parent POM at all](#why-a-shared-parent-pom-at-all)
@@ -23,7 +23,7 @@
 17. 🔹 [Known gaps / staleness notes](#known-gaps--staleness-notes)
 
 <a id="purpose-and-scope"></a>
-## <span style="color:hsl(79,68%,32%)">1. 🔹 Purpose and scope</span>
+## <span style="color:hsl(330,80%,58%)">1. 🔹 Purpose and scope</span>
 
 `super-pom` is the top-level Maven `<parent>` for every service in the `com.org.llm`
 platform (gateway, chat, RAG pipelines, MCP clients/servers, and the
@@ -50,7 +50,7 @@ It does **not** own application dependency versions directly (those live in
 any application source code.
 
 <a id="why-a-shared-parent-pom-at-all"></a>
-## <span style="color:hsl(91,68%,32%)">2. 🔨 Why a shared parent POM at all</span>
+## <span style="color:hsl(108,80%,58%)">2. 🔨 Why a shared parent POM at all</span>
 
 In a multi-repo organization with many Spring Boot services, three problems
 recur constantly if each service manages its own build:
@@ -85,14 +85,14 @@ across most non-trivial Spring Boot shops, sitting one level *below* Spring's
 own `spring-boot-starter-parent` and one level *above* individual services.
 
 <a id="the-two-layer-dependency-management-model"></a>
-## <span style="color:hsl(103,68%,32%)">3. 🤖 The two-layer dependency management model</span>
+## <span style="color:hsl(245,80%,58%)">3. 🤖 The two-layer dependency management model</span>
 
 This is the single most important architectural fact about this repository,
 and it is easy to miss on a first read of the POM: **`super-pom` has two
 distinct sources of dependency version management, stacked on top of each
 other, each doing a different job.**
 
-### <span style="color:hsl(115,68%,32%)">Layer 1 — `spring-boot-starter-parent` (the Maven `<parent>`)</span>
+### <span style="color:hsl(23,80%,58%)">Layer 1 — `spring-boot-starter-parent` (the Maven `<parent>`)</span>
 
 ```xml
 <parent>
@@ -124,7 +124,7 @@ Because this is a Maven **`<parent>`** relationship (not an import), it also
 means `super-pom` and everything beneath it participates in Spring Boot's
 plugin defaults, not just its dependency versions.
 
-### <span style="color:hsl(127,68%,32%)">Layer 2 — `learning-bom` (an imported BOM in `<dependencyManagement>`)</span>
+### <span style="color:hsl(160,80%,58%)">Layer 2 — `learning-bom` (an imported BOM in `<dependencyManagement>`)</span>
 
 ```xml
 <dependencyManagement>
@@ -180,7 +180,7 @@ bump `super-pom` to change enforcer rules without touching a single managed
 dependency version. Two axes of change, two release cadences, one import
 statement gluing them together.
 
-### <span style="color:hsl(139,68%,32%)">Net effect for a leaf service</span>
+### <span style="color:hsl(298,80%,58%)">Net effect for a leaf service</span>
 
 A service's own `pom.xml` sees a dependency version resolution order of
 roughly: its own explicit `<version>` (if any, discouraged) → `learning-bom`
@@ -198,7 +198,7 @@ with **no version tag at all**, and the correct, organization-approved
 version resolves automatically.
 
 <a id="architecture-diagram"></a>
-## <span style="color:hsl(151,68%,36%)">4. 🏗️ Architecture diagram</span>
+## <span style="color:hsl(75,80%,58%)">4. 🏗️ Architecture diagram</span>
 
 `design.svg` (embedded below) is the existing hand-drawn architecture
 diagram for this repository. It is **partially stale** relative to the
@@ -217,7 +217,7 @@ below describe the **current, actual** state of this `pom.xml` and should be
 treated as the source of truth until `design.svg` is redrawn.
 
 <a id="inheritance-chain"></a>
-## <span style="color:hsl(163,68%,36%)">5. 🔹 Inheritance chain</span>
+## <span style="color:hsl(213,80%,58%)">5. 🔹 Inheritance chain</span>
 
 ```mermaid
 graph TD
@@ -246,7 +246,7 @@ graph TD
     style LO fill:#d4edda,color:#155724,stroke:#28a745
 ```
 
-### <span style="color:hsl(175,68%,36%)">What flows through which mechanism</span>
+### <span style="color:hsl(350,80%,58%)">What flows through which mechanism</span>
 
 ```mermaid
 flowchart LR
@@ -275,7 +275,7 @@ flowchart LR
 ```
 
 <a id="coordinates-and-versioning"></a>
-## <span style="color:hsl(187,68%,36%)">6. 🏷️ Coordinates and versioning</span>
+## <span style="color:hsl(128,80%,58%)">6. 🏷️ Coordinates and versioning</span>
 
 | Field        | Value           |
 |--------------|-----------------|
@@ -291,7 +291,7 @@ local/remote repository. Every downstream service references this exact
 `groupId:artifactId:version` triple in its own `<parent>` block.
 
 <a id="properties"></a>
-## <span style="color:hsl(199,68%,36%)">7. ⚙️ Properties</span>
+## <span style="color:hsl(265,80%,58%)">7. ⚙️ Properties</span>
 
 | Property                                 | Value                  | Purpose                                                                                                           |
 |------------------------------------------|------------------------|-------------------------------------------------------------------------------------------------------------------|
@@ -312,7 +312,7 @@ everywhere the property is referenced, and makes `mvn versions:*` tooling
 able to detect and bump them mechanically.
 
 <a id="repositories-and-plugin-repositories"></a>
-## <span style="color:hsl(211,68%,44%)">8. 🔹 Repositories and plugin repositories</span>
+## <span style="color:hsl(43,80%,58%)">8. 🔹 Repositories and plugin repositories</span>
 
 ```xml
 <repositories>
@@ -347,14 +347,14 @@ one service but not another is a classic source of "works on my machine but
 not in CI" build failures.
 
 <a id="active-plugins-wired-for-every-child-no-opt-in-required"></a>
-## <span style="color:hsl(223,68%,44%)">9. 🔹 Active plugins (wired for every child, no opt-in required)</span>
+## <span style="color:hsl(180,80%,58%)">9. 🔹 Active plugins (wired for every child, no opt-in required)</span>
 
 These plugins live in `<build><plugins>` (as opposed to
 `<pluginManagement>`), which means Maven activates them for **every single
 child module automatically** — a child never has to redeclare them to get
 their behavior.
 
-### <span style="color:hsl(235,68%,44%)">`spring-boot-maven-plugin`</span>
+### <span style="color:hsl(318,80%,58%)">`spring-boot-maven-plugin`</span>
 
 ```xml
 <plugin>
@@ -397,7 +397,7 @@ Two things happen here:
 
 </ul>
 
-### <span style="color:hsl(247,68%,44%)">`git-commit-id-maven-plugin`</span>
+### <span style="color:hsl(95,80%,58%)">`git-commit-id-maven-plugin`</span>
 
 ```xml
 <plugin>
@@ -433,7 +433,7 @@ bookkeeping. It is the kind of low-effort, high-value traceability plugin
 that is easy to forget to add per-repo and easy to standardize once,
 centrally.
 
-### <span style="color:hsl(259,68%,44%)">`maven-compiler-plugin`</span>
+### <span style="color:hsl(233,80%,58%)">`maven-compiler-plugin`</span>
 
 ```xml
 <plugin>
@@ -478,7 +478,7 @@ inherited from `spring-boot-starter-parent` combined with the
 `maven.compiler.release=${java.version}` property above — only the
 annotation processor wiring is overridden here.
 
-### <span style="color:hsl(271,68%,44%)">`maven-enforcer-plugin`</span>
+### <span style="color:hsl(10,80%,58%)">`maven-enforcer-plugin`</span>
 
 ```xml
 <plugin>
@@ -539,7 +539,7 @@ toolchain requirements are defined in one place and can be raised (e.g. from
 Java 21 to Java 25 as a hard floor) by editing one file, instantly affecting
 every service the next time it builds.
 
-### <span style="color:hsl(283,68%,44%)">`maven-surefire-plugin` and `maven-failsafe-plugin` — the Java 25 `--add-opens` flag</span>
+### <span style="color:hsl(148,80%,58%)">`maven-surefire-plugin` and `maven-failsafe-plugin` — the Java 25 `--add-opens` flag</span>
 
 ```xml
 <plugin>
@@ -587,7 +587,7 @@ bumping its JDK — it is already handled for both unit and integration test
 execution.
 
 <a id="pluginmanagement-opt-in-plugins"></a>
-## <span style="color:hsl(295,68%,44%)">10. 🔹 pluginManagement (opt-in plugins)</span>
+## <span style="color:hsl(285,80%,58%)">10. 🔹 pluginManagement (opt-in plugins)</span>
 
 Everything in `<build><pluginManagement>` provides a **version pin and
 default configuration**, but does **not** activate the plugin for any
@@ -627,7 +627,7 @@ Example — opting into JaCoCo from a child module:
 ```
 
 <a id="profiles"></a>
-## <span style="color:hsl(307,68%,44%)">11. ⚙️ Profiles</span>
+## <span style="color:hsl(63,80%,50%)">11. ⚙️ Profiles</span>
 
 Both profiles below are defined once, here, and are automatically
 **inherited** by every child module (Maven profiles declared in a parent
@@ -636,7 +636,7 @@ not need to redeclare or re-import anything to use `-Psecurity-scan` or
 `-Pmutation-test`; it only needs to invoke Maven with the corresponding
 flag from its own module directory.
 
-### <span style="color:hsl(319,68%,44%)">`security-scan` — OWASP dependency-check</span>
+### <span style="color:hsl(200,80%,58%)">`security-scan` — OWASP dependency-check</span>
 
 ```xml
 <profile>
@@ -700,7 +700,7 @@ scheduled CI job (nightly/weekly) or as a pre-release gate, so newly
 disclosed CVEs in third-party dependencies are caught even when no code in
 the service itself has changed.
 
-### <span style="color:hsl(331,68%,44%)">`mutation-test` — PIT mutation testing</span>
+### <span style="color:hsl(338,80%,58%)">`mutation-test` — PIT mutation testing</span>
 
 ```xml
 <profile>
@@ -790,7 +790,7 @@ CI job that only runs when core logic packages change, rather than on
 every commit.
 
 <a id="enforcer-rules-in-detail"></a>
-## <span style="color:hsl(343,68%,44%)">12. 🔹 Enforcer rules in detail</span>
+## <span style="color:hsl(115,80%,58%)">12. 🔹 Enforcer rules in detail</span>
 
 (See also the [`maven-enforcer-plugin` section](#maven-enforcer-plugin)
 above for the full XML and phase details.) Summarized for quick reference:
@@ -806,7 +806,7 @@ misconfigured environment is caught before compilation, tests, or packaging
 ever begin.
 
 <a id="how-a-leaf-repo-consumes-this-pom"></a>
-## <span style="color:hsl(355,68%,44%)">13. 🔨 How a leaf repo consumes this POM</span>
+## <span style="color:hsl(253,80%,58%)">13. 🔨 How a leaf repo consumes this POM</span>
 
 A leaf service opts into everything described in this document with
 nothing more than a `<parent>` declaration. For example, `llm-text2sql`'s
@@ -842,7 +842,7 @@ example: a brand-new service repository can be created with a ~15-line
 build provenance, and quality-gate tooling.
 
 <a id="build-and-install-order"></a>
-## <span style="color:hsl(7,68%,44%)">14. 🔨 Build and install order</span>
+## <span style="color:hsl(30,80%,58%)">14. 🔨 Build and install order</span>
 
 Because `super-pom` imports `learning-bom` and both are local,
 independently-versioned repositories (not yet necessarily published to a
@@ -868,7 +868,7 @@ resolves `com.org.llm:super-pom:1.0.0` and `com.org.learning:learning-bom:1.1.0`
 from the remote repository.
 
 <a id="suppressing-an-owasp-false-positive"></a>
-## <span style="color:hsl(19,68%,44%)">15. 🔹 Suppressing an OWASP false positive</span>
+## <span style="color:hsl(168,80%,58%)">15. 🔹 Suppressing an OWASP false positive</span>
 
 1. Run `mvn verify -Psecurity-scan` and inspect the generated HTML report
    at `target/dependency-check-report.html` to confirm the flagged CVE is
@@ -894,7 +894,7 @@ from the remote repository.
    honor the suppression.
 
 <a id="versioning-and-upgrade-policy"></a>
-## <span style="color:hsl(31,68%,44%)">16. 🏷️ Versioning and upgrade policy</span>
+## <span style="color:hsl(305,80%,58%)">16. 🏷️ Versioning and upgrade policy</span>
 
 <ul>
 
@@ -913,7 +913,7 @@ from the remote repository.
 </ul>
 
 <a id="known-gaps--staleness-notes"></a>
-## <span style="color:hsl(43,68%,32%)">17. 🔹 Known gaps / staleness notes</span>
+## <span style="color:hsl(83,80%,58%)">17. 🔹 Known gaps / staleness notes</span>
 
 `design.svg` was accurate to an earlier iteration of this POM but has
 drifted from the current `pom.xml` in the following ways. It is left in
