@@ -12,7 +12,7 @@
 
     <groupId>com.org.llm</groupId>
     <artifactId>super-pom</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>pom</packaging>
     <name>LLM :: Parent</name>
     <description>Corporate parent POM — imports llm-bom and wires all shared plugins</description>
@@ -28,7 +28,7 @@
         <pitest-maven.version>1.30.0</pitest-maven.version>
         <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
 
-        <learning-bom.version>2.0.0</learning-bom.version>
+        <learning-bom.version>2.1.0</learning-bom.version>
     </properties>
 
     <dependencyManagement>
