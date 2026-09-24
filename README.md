@@ -141,7 +141,7 @@ plugin defaults, not just its dependency versions.
 ```
 
 `learning-bom` lives in a separate repository (`maven-bom`, artifact
-`com.org.learning:learning-bom`, currently pinned here at `2.1.0`) and is
+`com.org.learning:learning-bom`, currently pinned here at `3.0.0`) and is
 **imported**, not inherited. An imported BOM only contributes managed
 dependency *versions* — it contributes no plugin configuration, no
 properties beyond what Maven's import mechanics expose, and no parent-child
@@ -222,8 +222,8 @@ treated as the source of truth until `design.svg` is redrawn.
 ```mermaid
 graph TD
     SBSP["org.springframework.boot:spring-boot-starter-parent:4.1.1<br/>(upstream, Maven &lt;parent&gt;)"]
-    BOM["com.org.learning:learning-bom:2.1.0<br/>(maven-bom repo, imported dependencyManagement)"]
-    SP["com.org.llm:super-pom:1.1.1<br/>(this repo, packaging=pom)"]
+    BOM["com.org.learning:learning-bom:3.0.0<br/>(maven-bom repo, imported dependencyManagement)"]
+    SP["com.org.llm:super-pom:1.1.2<br/>(this repo, packaging=pom)"]
 
     SBSP -->|"Maven &lt;parent&gt; inheritance<br/>(plugin defaults + spring-boot-dependencies)"| SP
     BOM -->|"&lt;dependencyManagement&gt; import<br/>(managed versions only, no plugins)"| SP
@@ -281,7 +281,7 @@ flowchart LR
 |--------------|-----------------|
 | `groupId`    | `com.org.llm`   |
 | `artifactId` | `super-pom`     |
-| `version`    | `1.1.1`         |
+| `version`    | `1.1.2`         |
 | `packaging`  | `pom`           |
 | `name`       | `LLM :: Parent` |
 
@@ -304,7 +304,7 @@ local/remote repository. Every downstream service references this exact
 | `dependency-check-maven.version`         | `13.0.0`               | Version pin for the OWASP CVE scanner used by the `security-scan` profile.                                        |
 | `pitest-maven.version`                   | `1.30.0`               | Version pin for the PIT mutation-testing engine used by the `mutation-test` profile.                              |
 | `pitest-junit5-plugin.version`           | `1.2.3`                | JUnit 5 integration shim required for PIT to discover JUnit 5 tests.                                              |
-| `learning-bom.version`                   | `2.1.0`                | Pinned version of the imported organizational BOM (see the two-layer model above).                                |
+| `learning-bom.version`                   | `3.0.0`                | Pinned version of the imported organizational BOM (see the two-layer model above).                                |
 
 Centralizing these as properties (rather than hard-coding version strings
 inline on each plugin) means a single-line change here updates the version
@@ -816,7 +816,7 @@ own `pom.xml` contains:
 <parent>
     <groupId>com.org.llm</groupId>
     <artifactId>super-pom</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <relativePath/>
 </parent>
 
@@ -864,7 +864,7 @@ cd ~/projects/llm-text2sql && ./mvnw package
 In an environment with a shared internal Maven repository manager, steps 1
 and 2 are typically handled by that BOM/parent repository's own release
 pipeline instead of a manual local install, and a leaf service simply
-resolves `com.org.llm:super-pom:1.1.1` and `com.org.learning:learning-bom:2.1.0`
+resolves `com.org.llm:super-pom:1.1.2` and `com.org.learning:learning-bom:3.0.0`
 from the remote repository.
 
 <a id="suppressing-an-owasp-false-positive"></a>
@@ -898,14 +898,14 @@ from the remote repository.
 
 <ul>
 
-- ***Two lines coexist (Sept 2026)***: `learning-*` repos use `super-pom` ***1.1.1*** (Boot 4.1.1, `learning-bom` 2.1.0 with Testcontainers 2.x and the Resilience4j Boot 4 starter managed; 1.1.0 → BOM 2.0.0 lacked that entry). The `llm-*` repos stay on ***1.0.0*** (Boot 4.1.0, `learning-bom` 1.1.4) until they are migrated, which is why 1.0.0 was not overwritten in place.
-- **`super-pom`'s own version** (`1.1.1`) should be bumped whenever plugin
+- ***Two lines coexist (Sept 2026)***: `learning-*` repos use `super-pom` ***1.1.2*** (Boot 4.1.1, `learning-bom` 3.0.0: Testcontainers 2.x; Resilience4j follows Spring Cloud at 2.3.0 with `resilience4j-spring-boot3`). 1.1.0/1.1.1 (BOM 2.0.0/2.1.0) are superseded. The `llm-*` repos stay on ***1.0.0*** (Boot 4.1.0, `learning-bom` 1.1.4) until they are migrated, which is why 1.0.0 was not overwritten in place.
+- **`super-pom`'s own version** (`1.1.2`) should be bumped whenever plugin
   configuration, enforcer rules, or the Spring Boot parent version changes
   — i.e. whenever the *build behavior* every child inherits changes.
 - **`learning-bom.version`** should be bumped independently whenever the
   organization wants to move a managed dependency version (e.g. a new
   Testcontainers or Spring AI release) without touching any plugin
-  configuration. This repository currently pins `learning-bom` at `2.1.0`.
+  configuration. This repository currently pins `learning-bom` at `3.0.0`.
 - Leaf services pick up changes to either only when they explicitly bump
   the `<version>` in their own `<parent>` block — inheritance is not
   automatic/floating; it is pinned per leaf repo, the same way any Maven
@@ -927,10 +927,10 @@ and the actual `pom.xml`, not the diagram, until it is redrawn:
 
 - The diagram labels the imported BOM `llm-bom` (`com.org.llm:llm-bom:1.0.0`).
   The real imported artifact is `com.org.learning:learning-bom`, currently
-  version `2.1.0`, living in the separate `learning-bom` repository.
+  version `3.0.0`, living in the separate `learning-bom` repository.
 - The diagram labels this repository `llm-parent`
   (`com.org.llm:llm-parent:1.0.0`). The real coordinates are
-  `com.org.llm:super-pom:1.1.1`, matching this repository's actual name.
+  `com.org.llm:super-pom:1.1.2`, matching this repository's actual name.
 - The diagram lists `jacoco-maven-plugin` at version `0.8.13`; the real
   pinned version is `0.8.15`.
 - The diagram's "active plugins for all children" box only shows
