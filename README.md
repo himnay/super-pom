@@ -140,8 +140,8 @@ plugin defaults, not just its dependency versions.
 </dependencyManagement>
 ```
 
-`learning-bom` lives in a separate repository (`maven-bom`, artifact
-`com.org.learning:learning-bom`, currently pinned here at `3.0.0`) and is
+`learning-bom` lives in a separate repository (`learning-bom`, artifact
+`com.org.learning:learning-bom`, currently pinned here at `3.0.1`) and is
 **imported**, not inherited. An imported BOM only contributes managed
 dependency *versions* — it contributes no plugin configuration, no
 properties beyond what Maven's import mechanics expose, and no parent-child
@@ -222,8 +222,8 @@ treated as the source of truth until `design.svg` is redrawn.
 ```mermaid
 graph TD
     SBSP["org.springframework.boot:spring-boot-starter-parent:4.1.1<br/>(upstream, Maven &lt;parent&gt;)"]
-    BOM["com.org.learning:learning-bom:3.0.0<br/>(maven-bom repo, imported dependencyManagement)"]
-    SP["com.org.llm:super-pom:1.1.2<br/>(this repo, packaging=pom)"]
+    BOM["com.org.learning:learning-bom:3.0.1<br/>(learning-bom repo, imported dependencyManagement)"]
+    SP["com.org.llm:super-pom:1.1.3<br/>(this repo, packaging=pom)"]
 
     SBSP -->|"Maven &lt;parent&gt; inheritance<br/>(plugin defaults + spring-boot-dependencies)"| SP
     BOM -->|"&lt;dependencyManagement&gt; import<br/>(managed versions only, no plugins)"| SP
@@ -281,7 +281,7 @@ flowchart LR
 |--------------|-----------------|
 | `groupId`    | `com.org.llm`   |
 | `artifactId` | `super-pom`     |
-| `version`    | `1.1.2`         |
+| `version`    | `1.1.3`         |
 | `packaging`  | `pom`           |
 | `name`       | `LLM :: Parent` |
 
@@ -299,12 +299,12 @@ local/remote repository. Every downstream service references this exact
 | `maven.compiler.release`                 | `${java.version}` (25) | Passed to `javac --release`; guarantees bytecode + API compatibility with Java 25, not just source compatibility. |
 | `avro-maven-plugin.version`              | `1.12.2`               | Version pin for the opt-in Avro schema-to-Java code generator.                                                    |
 | `build-helper-maven-plugin.version`      | `3.6.2`                | Version pin for the opt-in extra-source-directory helper plugin.                                                  |
-| `spotless-maven-plugin.version`          | `3.10.2`               | Version pin for the opt-in code formatter.                                                                        |
+| `spotless-maven-plugin.version`          | `3.10.3`               | Version pin for the opt-in code formatter.                                                                        |
 | `openapi-generator-maven-plugin.version` | `7.25.0`               | Version pin for the opt-in OpenAPI client/server stub generator.                                                  |
 | `dependency-check-maven.version`         | `13.0.0`               | Version pin for the OWASP CVE scanner used by the `security-scan` profile.                                        |
 | `pitest-maven.version`                   | `1.30.0`               | Version pin for the PIT mutation-testing engine used by the `mutation-test` profile.                              |
 | `pitest-junit5-plugin.version`           | `1.2.3`                | JUnit 5 integration shim required for PIT to discover JUnit 5 tests.                                              |
-| `learning-bom.version`                   | `3.0.0`                | Pinned version of the imported organizational BOM (see the two-layer model above).                                |
+| `learning-bom.version`                   | `3.0.1`                | Pinned version of the imported organizational BOM (see the two-layer model above).                                |
 
 Centralizing these as properties (rather than hard-coding version strings
 inline on each plugin) means a single-line change here updates the version
@@ -603,7 +603,7 @@ everywhere.
 | `build-helper-maven-plugin`      | `3.6.2`  | Adds extra source/test-source directories to the build (e.g. generated-sources folders not on the default path).                                                     | None beyond version pin.                                                                                                                                                                                                                                                          |
 | `avro-maven-plugin`              | `1.12.2` | Compiles Avro `.avsc`/`.avdl` schema files into generated Java POJOs at build time.                                                                                  | None beyond version pin.                                                                                                                                                                                                                                                          |
 | `jacoco-maven-plugin`            | `0.8.15` | Instruments tests to produce code-coverage data and an HTML/XML coverage report.                                                                                     | Two executions pre-wired: `prepare-agent` (attaches the coverage agent to the test JVM) and a `report` execution bound to the `verify` phase. A child module only has to declare the bare `<plugin>` element with matching `groupId`/`artifactId` — the executions are inherited. |
-| `spotless-maven-plugin`          | `3.10.2` | Enforces and auto-applies consistent code formatting (imports, whitespace, etc.), typically wired to fail the build (`spotless:check`) or fix it (`spotless:apply`). | None beyond version pin — per-module formatter rules (e.g. which formatter/style) are left to the child.                                                                                                                                                                          |
+| `spotless-maven-plugin`          | `3.10.3` | Enforces and auto-applies consistent code formatting (imports, whitespace, etc.), typically wired to fail the build (`spotless:check`) or fix it (`spotless:apply`). | None beyond version pin — per-module formatter rules (e.g. which formatter/style) are left to the child.                                                                                                                                                                          |
 | `openapi-generator-maven-plugin` | `7.25.0` | Generates client or server stub code from an OpenAPI/Swagger specification.                                                                                          | None beyond version pin — `inputSpec`/`generatorName`/output package are necessarily module-specific.                                                                                                                                                                             |
 
 Because these are opt-in, a service that has no Avro schemas or no OpenAPI
@@ -816,7 +816,7 @@ own `pom.xml` contains:
 <parent>
     <groupId>com.org.llm</groupId>
     <artifactId>super-pom</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.3</version>
     <relativePath/>
 </parent>
 
@@ -852,19 +852,19 @@ service can build:
 
 ```bash
 # 1. Install the BOM first (super-pom's dependencyManagement imports it)
-cd ~/projects/maven-bom && ./mvnw install -N   # or: mvn install
+cd ~/projects/learning-bom && mvn install -N
 
 # 2. Install this parent (depends on learning-bom being resolvable)
-cd ~/projects/super-pom && ./mvnw install
+cd ~/projects/super-pom && mvn install -N
 
 # 3. Build any service that declares super-pom as its <parent>
-cd ~/projects/llm-text2sql && ./mvnw package
+cd ~/projects/llm-text2sql && mvn package
 ```
 
 In an environment with a shared internal Maven repository manager, steps 1
 and 2 are typically handled by that BOM/parent repository's own release
 pipeline instead of a manual local install, and a leaf service simply
-resolves `com.org.llm:super-pom:1.1.2` and `com.org.learning:learning-bom:3.0.0`
+resolves `com.org.llm:super-pom:1.1.3` and `com.org.learning:learning-bom:3.0.1`
 from the remote repository.
 
 <a id="suppressing-an-owasp-false-positive"></a>
@@ -898,14 +898,14 @@ from the remote repository.
 
 <ul>
 
-- ***Two lines coexist (Sept 2026)***: `learning-*` repos use `super-pom` ***1.1.2*** (Boot 4.1.1, `learning-bom` 3.0.0: Testcontainers 2.x; Resilience4j follows Spring Cloud at 2.3.0 with `resilience4j-spring-boot3`). 1.1.0/1.1.1 (BOM 2.0.0/2.1.0) are superseded. The `llm-*` repos stay on ***1.0.0*** (Boot 4.1.0, `learning-bom` 1.1.4) until they are migrated, which is why 1.0.0 was not overwritten in place.
-- **`super-pom`'s own version** (`1.1.2`) should be bumped whenever plugin
+- ***Two lines coexist (Sept 2026)***: `learning-*` repos use `super-pom` ***1.1.3*** (Boot 4.1.1, `learning-bom` 3.0.1: Testcontainers 2.x; Resilience4j follows Spring Cloud at 2.3.0 with `resilience4j-spring-boot3`). 1.1.0–1.1.2 (BOM 2.0.0–3.0.0) are superseded. The `llm-*` repos stay on ***1.0.0*** (Boot 4.1.0, `learning-bom` 1.1.4) until they are migrated, which is why 1.0.0 was not overwritten in place.
+- **`super-pom`'s own version** (`1.1.3`) should be bumped whenever plugin
   configuration, enforcer rules, or the Spring Boot parent version changes
   — i.e. whenever the *build behavior* every child inherits changes.
 - **`learning-bom.version`** should be bumped independently whenever the
   organization wants to move a managed dependency version (e.g. a new
   Testcontainers or Spring AI release) without touching any plugin
-  configuration. This repository currently pins `learning-bom` at `3.0.0`.
+  configuration. This repository currently pins `learning-bom` at `3.0.1`.
 - Leaf services pick up changes to either only when they explicitly bump
   the `<version>` in their own `<parent>` block — inheritance is not
   automatic/floating; it is pinned per leaf repo, the same way any Maven
@@ -927,10 +927,10 @@ and the actual `pom.xml`, not the diagram, until it is redrawn:
 
 - The diagram labels the imported BOM `llm-bom` (`com.org.llm:llm-bom:1.0.0`).
   The real imported artifact is `com.org.learning:learning-bom`, currently
-  version `3.0.0`, living in the separate `learning-bom` repository.
+  version `3.0.1`, living in the separate `learning-bom` repository.
 - The diagram labels this repository `llm-parent`
   (`com.org.llm:llm-parent:1.0.0`). The real coordinates are
-  `com.org.llm:super-pom:1.1.2`, matching this repository's actual name.
+  `com.org.llm:super-pom:1.1.3`, matching this repository's actual name.
 - The diagram lists `jacoco-maven-plugin` at version `0.8.13`; the real
   pinned version is `0.8.15`.
 - The diagram's "active plugins for all children" box only shows
