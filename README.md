@@ -223,7 +223,7 @@ treated as the source of truth until `design.svg` is redrawn.
 graph TD
     SBSP["org.springframework.boot:spring-boot-starter-parent:4.1.1<br/>(upstream, Maven &lt;parent&gt;)"]
     BOM["com.org.learning:learning-bom:3.0.1<br/>(learning-bom repo, imported dependencyManagement)"]
-    SP["com.org.llm:super-pom:1.1.4<br/>(this repo, packaging=pom)"]
+    SP["com.org.llm:super-pom:1.2.0<br/>(this repo, packaging=pom)"]
 
     SBSP -->|"Maven &lt;parent&gt; inheritance<br/>(plugin defaults + spring-boot-dependencies)"| SP
     BOM -->|"&lt;dependencyManagement&gt; import<br/>(managed versions only, no plugins)"| SP
@@ -262,7 +262,7 @@ flowchart LR
         B4[Oracle JDBC, Resilience4j,<br/>Micrometer extras, Logstash,<br/>ShedLock, and more]
     end
     subgraph "super-pom itself contributes"
-        C1[Java 25 / Maven 3.9 enforcement]
+        C1[Java 27 / Maven 3.9 enforcement]
         C2[Active plugins: build-info,<br/>git-commit-id, compiler,<br/>enforcer, surefire, failsafe]
         C3[Opt-in pluginManagement:<br/>jacoco, spotless, build-helper,<br/>avro, openapi-generator]
         C4[Opt-in profiles:<br/>security-scan, mutation-test]
@@ -281,7 +281,7 @@ flowchart LR
 |--------------|-----------------|
 | `groupId`    | `com.org.llm`   |
 | `artifactId` | `super-pom`     |
-| `version`    | `1.1.4`         |
+| `version`    | `1.2.0`         |
 | `packaging`  | `pom`           |
 | `name`       | `LLM :: Parent` |
 
@@ -295,8 +295,8 @@ local/remote repository. Every downstream service references this exact
 
 | Property                                 | Value                  | Purpose                                                                                                           |
 |------------------------------------------|------------------------|-------------------------------------------------------------------------------------------------------------------|
-| `java.version`                           | `25`                   | Baseline Java language/runtime version for every child module.                                                    |
-| `maven.compiler.release`                 | `${java.version}` (25) | Passed to `javac --release`; guarantees bytecode + API compatibility with Java 25, not just source compatibility. |
+| `java.version`                           | `27`                   | Baseline Java language/runtime version for every child module.                                                    |
+| `maven.compiler.release`                 | `${java.version}` (27) | Passed to `javac --release`; guarantees bytecode + API compatibility with Java 27, not just source compatibility. |
 | `avro-maven-plugin.version`              | `1.12.2`               | Version pin for the opt-in Avro schema-to-Java code generator.                                                    |
 | `build-helper-maven-plugin.version`      | `3.6.2`                | Version pin for the opt-in extra-source-directory helper plugin.                                                  |
 | `spotless-maven-plugin.version`          | `3.10.3`               | Version pin for the opt-in code formatter.                                                                        |
@@ -537,10 +537,10 @@ Three rules are active:
 
 Centralizing enforcer rules here means the whole organization's minimum
 toolchain requirements are defined in one place and can be raised (e.g. from
-Java 21 to Java 25 as a hard floor) by editing one file, instantly affecting
+Java 21 to Java 27 as a hard floor, as 1.2.0 did) by editing one file, instantly affecting
 every service the next time it builds.
 
-### <span style="color:hsl(148,80%,58%)">`maven-surefire-plugin` and `maven-failsafe-plugin` — the Java 25 `--add-opens` flag</span>
+### <span style="color:hsl(148,80%,58%)">`maven-surefire-plugin` and `maven-failsafe-plugin` — the `--add-opens` flag</span>
 
 ```xml
 <plugin>
@@ -580,7 +580,7 @@ frameworks (Mockito's inline mock maker), certain serialization libraries,
 and test frameworks that reflectively manipulate `final` fields or
 constructors on JDK-internal classes — increasingly need `java.lang`
 specifically opened to run under a modern JDK (this repo's baseline is
-Java 25, per `java.version`). Without this flag, tests that previously
+Java 27, per `java.version`). Without this flag, tests that previously
 worked can start failing with `InaccessibleObjectException` purely because
 of a JDK upgrade, with no code change on the team's part. Centralizing the
 flag here means no service has to rediscover this the hard way after
@@ -817,7 +817,7 @@ own `pom.xml` contains:
 <parent>
     <groupId>com.org.llm</groupId>
     <artifactId>super-pom</artifactId>
-    <version>1.1.4</version>
+    <version>1.2.0</version>
     <relativePath/>
 </parent>
 
@@ -865,7 +865,7 @@ cd ~/projects/llm-text2sql && mvn package
 In an environment with a shared internal Maven repository manager, steps 1
 and 2 are typically handled by that BOM/parent repository's own release
 pipeline instead of a manual local install, and a leaf service simply
-resolves `com.org.llm:super-pom:1.1.4` and `com.org.learning:learning-bom:3.0.1`
+resolves `com.org.llm:super-pom:1.2.0` and `com.org.learning:learning-bom:3.0.1`
 from the remote repository.
 
 <a id="suppressing-an-owasp-false-positive"></a>
@@ -899,8 +899,8 @@ from the remote repository.
 
 <ul>
 
-- ***One line (Sept 2026)***: every `learning-*` and `llm-*` repo uses `super-pom` ***1.1.4*** (Boot 4.1.1, `learning-bom` 3.0.1). 1.1.4 only adds the Lombok 1.18.48 override that lets builds run on JDK 27; 1.1.0–1.1.3 are superseded and 1.0.0 is no longer used.
-- **`super-pom`'s own version** (`1.1.4`) should be bumped whenever plugin
+- ***One line (Sept 2026)***: every `learning-*` and `llm-*` repo uses `super-pom` ***1.2.0*** (Boot 4.1.1, `learning-bom` 3.0.1, Java 27 baseline). 1.2.0 raised `java.version` from 25 to 27 and the enforcer floor to Java 27; 1.1.4 had added the Lombok 1.18.48 override that JDK 27 needs. Older versions are superseded.
+- **`super-pom`'s own version** (`1.2.0`) should be bumped whenever plugin
   configuration, enforcer rules, or the Spring Boot parent version changes
   — i.e. whenever the *build behavior* every child inherits changes.
 - **`learning-bom.version`** should be bumped independently whenever the
@@ -931,7 +931,7 @@ and the actual `pom.xml`, not the diagram, until it is redrawn:
   version `3.0.1`, living in the separate `learning-bom` repository.
 - The diagram labels this repository `llm-parent`
   (`com.org.llm:llm-parent:1.0.0`). The real coordinates are
-  `com.org.llm:super-pom:1.1.4`, matching this repository's actual name.
+  `com.org.llm:super-pom:1.2.0`, matching this repository's actual name.
 - The diagram lists `jacoco-maven-plugin` at version `0.8.13`; the real
   pinned version is `0.8.15`.
 - The diagram's "active plugins for all children" box only shows

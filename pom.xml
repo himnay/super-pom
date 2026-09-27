@@ -12,13 +12,13 @@
 
     <groupId>com.org.llm</groupId>
     <artifactId>super-pom</artifactId>
-    <version>1.1.4</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
     <name>LLM :: Parent</name>
     <description>Corporate parent POM — imports llm-bom and wires all shared plugins</description>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>27</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <avro-maven-plugin.version>1.12.2</avro-maven-plugin.version>
         <build-helper-maven-plugin.version>3.6.2</build-helper-maven-plugin.version>
@@ -189,8 +189,8 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>[21,)</version>
-                                    <message>Java 21 or higher is required.</message>
+                                    <version>[27,)</version>
+                                    <message>Java 27 or higher is required (maven.compiler.release is 27).</message>
                                 </requireJavaVersion>
                                 <requireMavenVersion>
                                     <version>[3.9,)</version>
