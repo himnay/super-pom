@@ -12,7 +12,7 @@
 
     <groupId>com.org.llm</groupId>
     <artifactId>super-pom</artifactId>
-    <version>1.1.3</version>
+    <version>1.1.4</version>
     <packaging>pom</packaging>
     <name>LLM :: Parent</name>
     <description>Corporate parent POM — imports llm-bom and wires all shared plugins</description>
@@ -29,6 +29,11 @@
         <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
 
         <learning-bom.version>3.0.1</learning-bom.version>
+
+        <!-- Overrides the version managed by spring-boot-dependencies (1.18.46): 1.18.48 is the first
+             Lombok that runs on JDK 27's javac (older versions fail with ExceptionInInitializerError
+             on com.sun.tools.javac.tree.EndPosTable). Also used for the annotation processor path. -->
+        <lombok.version>1.18.48</lombok.version>
     </properties>
 
     <dependencyManagement>

@@ -223,7 +223,7 @@ treated as the source of truth until `design.svg` is redrawn.
 graph TD
     SBSP["org.springframework.boot:spring-boot-starter-parent:4.1.1<br/>(upstream, Maven &lt;parent&gt;)"]
     BOM["com.org.learning:learning-bom:3.0.1<br/>(learning-bom repo, imported dependencyManagement)"]
-    SP["com.org.llm:super-pom:1.1.3<br/>(this repo, packaging=pom)"]
+    SP["com.org.llm:super-pom:1.1.4<br/>(this repo, packaging=pom)"]
 
     SBSP -->|"Maven &lt;parent&gt; inheritance<br/>(plugin defaults + spring-boot-dependencies)"| SP
     BOM -->|"&lt;dependencyManagement&gt; import<br/>(managed versions only, no plugins)"| SP
@@ -281,7 +281,7 @@ flowchart LR
 |--------------|-----------------|
 | `groupId`    | `com.org.llm`   |
 | `artifactId` | `super-pom`     |
-| `version`    | `1.1.3`         |
+| `version`    | `1.1.4`         |
 | `packaging`  | `pom`           |
 | `name`       | `LLM :: Parent` |
 
@@ -300,6 +300,7 @@ local/remote repository. Every downstream service references this exact
 | `avro-maven-plugin.version`              | `1.12.2`               | Version pin for the opt-in Avro schema-to-Java code generator.                                                    |
 | `build-helper-maven-plugin.version`      | `3.6.2`                | Version pin for the opt-in extra-source-directory helper plugin.                                                  |
 | `spotless-maven-plugin.version`          | `3.10.3`               | Version pin for the opt-in code formatter.                                                                        |
+| `lombok.version`                         | `1.18.48`              | Overrides Boot's 1.18.46: the first Lombok that runs on JDK 27's `javac`. Also used for the annotation processor. |
 | `openapi-generator-maven-plugin.version` | `7.25.0`               | Version pin for the opt-in OpenAPI client/server stub generator.                                                  |
 | `dependency-check-maven.version`         | `13.0.0`               | Version pin for the OWASP CVE scanner used by the `security-scan` profile.                                        |
 | `pitest-maven.version`                   | `1.30.0`               | Version pin for the PIT mutation-testing engine used by the `mutation-test` profile.                              |
@@ -816,7 +817,7 @@ own `pom.xml` contains:
 <parent>
     <groupId>com.org.llm</groupId>
     <artifactId>super-pom</artifactId>
-    <version>1.1.3</version>
+    <version>1.1.4</version>
     <relativePath/>
 </parent>
 
@@ -864,7 +865,7 @@ cd ~/projects/llm-text2sql && mvn package
 In an environment with a shared internal Maven repository manager, steps 1
 and 2 are typically handled by that BOM/parent repository's own release
 pipeline instead of a manual local install, and a leaf service simply
-resolves `com.org.llm:super-pom:1.1.3` and `com.org.learning:learning-bom:3.0.1`
+resolves `com.org.llm:super-pom:1.1.4` and `com.org.learning:learning-bom:3.0.1`
 from the remote repository.
 
 <a id="suppressing-an-owasp-false-positive"></a>
@@ -898,8 +899,8 @@ from the remote repository.
 
 <ul>
 
-- ***Two lines coexist (Sept 2026)***: `learning-*` repos use `super-pom` ***1.1.3*** (Boot 4.1.1, `learning-bom` 3.0.1: Testcontainers 2.x; Resilience4j follows Spring Cloud at 2.3.0 with `resilience4j-spring-boot3`). 1.1.0–1.1.2 (BOM 2.0.0–3.0.0) are superseded. The `llm-*` repos stay on ***1.0.0*** (Boot 4.1.0, `learning-bom` 1.1.4) until they are migrated, which is why 1.0.0 was not overwritten in place.
-- **`super-pom`'s own version** (`1.1.3`) should be bumped whenever plugin
+- ***One line (Sept 2026)***: every `learning-*` and `llm-*` repo uses `super-pom` ***1.1.4*** (Boot 4.1.1, `learning-bom` 3.0.1). 1.1.4 only adds the Lombok 1.18.48 override that lets builds run on JDK 27; 1.1.0–1.1.3 are superseded and 1.0.0 is no longer used.
+- **`super-pom`'s own version** (`1.1.4`) should be bumped whenever plugin
   configuration, enforcer rules, or the Spring Boot parent version changes
   — i.e. whenever the *build behavior* every child inherits changes.
 - **`learning-bom.version`** should be bumped independently whenever the
@@ -930,7 +931,7 @@ and the actual `pom.xml`, not the diagram, until it is redrawn:
   version `3.0.1`, living in the separate `learning-bom` repository.
 - The diagram labels this repository `llm-parent`
   (`com.org.llm:llm-parent:1.0.0`). The real coordinates are
-  `com.org.llm:super-pom:1.1.3`, matching this repository's actual name.
+  `com.org.llm:super-pom:1.1.4`, matching this repository's actual name.
 - The diagram lists `jacoco-maven-plugin` at version `0.8.13`; the real
   pinned version is `0.8.15`.
 - The diagram's "active plugins for all children" box only shows
