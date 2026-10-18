@@ -1,0 +1,49 @@
+name: Publish
+# Deploys super-pom to GitHub Packages so tools that only see one repo (Dependabot) can resolve the parent.
+# GitHub Packages refuses to overwrite a release version, so an already-published version is skipped.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # super-pom imports learning-bom, which must be in the local repository to read the POM
+      - uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository_owner }}/learning-bom
+          path: learning-bom
+      - uses: actions/checkout@v5
+        with:
+          path: super-pom
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '27'
+          distribution: 'temurin'
+          server-id: github
+      - name: Install learning-bom
+        run: mvn -B -N install
+        working-directory: learning-bom
+      - name: Check whether this version is published
+        id: version
+        working-directory: super-pom
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(mvn -B -q -N help:evaluate -Dexpression=project.version -DforceStdout)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if gh api "/users/${{ github.repository_owner }}/packages/maven/com.org.llm.super-pom/versions" \
+               --jq '.[].name' 2>/dev/null | grep -qx "$version"; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "super-pom $version is already published"
+          fi
+      - name: Deploy
+        if: steps.version.outputs.published != 'true'
+        working-directory: super-pom
+        run: mvn -B -N deploy -DaltDeploymentRepository=github::https://maven.pkg.github.com/${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
